@@ -1,0 +1,23 @@
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+*.csproj
+*.sln
+*.user
+*.userprefs
+.vs/
+.idea/
+.utmp/
+
+# Generated Android bundles, test reports and diagnostic logs.
+Release/*.aab
+Release/*.apk
+Release/*.apks
+Release/*.log
+Release/*-tests.xml
+Release/qa-*/
+Tools/bin/

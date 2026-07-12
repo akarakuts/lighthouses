@@ -1,0 +1,33 @@
+name: Unity Quality
+
+on:
+  pull_request:
+  push:
+    branches: [master, main]
+
+jobs:
+  editmode:
+    name: EditMode tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: 6000.3.19f1
+          testMode: EditMode
+          artifactsPath: artifacts/editmode
+
+  playmode:
+    name: PlayMode tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: 6000.3.19f1
+          testMode: PlayMode
+          artifactsPath: artifacts/playmode

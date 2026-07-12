@@ -1,0 +1,19 @@
+{
+  "name": "LighthouseMatch3.PlayModeTests",
+  "rootNamespace": "LighthouseMatch3.Tests",
+  "references": [
+    "LighthouseMatch3.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

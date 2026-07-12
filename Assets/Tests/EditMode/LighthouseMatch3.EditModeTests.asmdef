@@ -1,0 +1,21 @@
+{
+  "name": "LighthouseMatch3.EditModeTests",
+  "rootNamespace": "LighthouseMatch3.Tests",
+  "references": [
+    "LighthouseMatch3.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}
