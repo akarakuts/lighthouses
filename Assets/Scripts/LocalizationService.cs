@@ -45,6 +45,17 @@ namespace LighthouseMatch3
             ["win"] = "Island restored! {0} stars and {1} coins earned.",
             ["lose"] = "The tide was too strong. Try the level again.",
             ["reward"] = "Daily reward: {0} coins. Come back tomorrow to extend your streak.",
+            ["lives_full"] = "Full",
+            ["life_recovery"] = "{0:00}:{1:00}",
+            ["lighthouse_stage_0"] = "A dark tower",
+            ["lighthouse_stage_1"] = "The keeper's house",
+            ["lighthouse_stage_2"] = "The repaired pier",
+            ["lighthouse_stage_3"] = "The observatory",
+            ["lighthouse_stage_4"] = "Beacon of the archipelago",
+            ["lighthouse_complete"] = "The islands shine again.",
+            ["lighthouse_progress"] = "Bring stars from the levels to rebuild the lighthouse.",
+            ["lighthouse_upgrade"] = "Upgrade for {0} stars",
+            ["lighthouse_upgraded"] = "The lighthouse reaches stage {0}. A new island answers its light.",
             ["coral"] = "coral", ["shell"] = "shells", ["drop"] = "drops", ["sunstone"] = "sunstones", ["starfish"] = "starfish", ["crystal"] = "crystals"
         };
 
@@ -86,6 +97,17 @@ namespace LighthouseMatch3
             ["win"] = "Остров восстановлен! Получено: звёзды {0}, монеты {1}.",
             ["lose"] = "Прилив оказался сильнее. Попробуйте уровень снова.",
             ["reward"] = "Ежедневная награда: {0} монет. Возвращайтесь завтра, чтобы продолжить серию.",
+            ["lives_full"] = "Полные",
+            ["life_recovery"] = "{0:00}:{1:00}",
+            ["lighthouse_stage_0"] = "Тёмная башня",
+            ["lighthouse_stage_1"] = "Дом смотрителя",
+            ["lighthouse_stage_2"] = "Восстановленный пирс",
+            ["lighthouse_stage_3"] = "Обсерватория",
+            ["lighthouse_stage_4"] = "Маяк архипелага",
+            ["lighthouse_complete"] = "Острова снова сияют.",
+            ["lighthouse_progress"] = "Принесите звёзды с уровней, чтобы восстановить маяк.",
+            ["lighthouse_upgrade"] = "Улучшить за {0} звёзд",
+            ["lighthouse_upgraded"] = "Маяк достиг стадии {0}. Новый остров откликается на его свет.",
             ["coral"] = "коралл", ["shell"] = "ракушки", ["drop"] = "капли", ["sunstone"] = "солнечные камни", ["starfish"] = "морские звёзды", ["crystal"] = "кристаллы"
         };
 
@@ -103,8 +125,16 @@ namespace LighthouseMatch3
         public static string Get(string key, params object[] arguments)
         {
             Dictionary<string, string> table = IsRussian ? Russian : English;
-            string value = table.TryGetValue(key, out string translated) ? translated : English[key];
+            if (!table.TryGetValue(key, out string value))
+                value = English.TryGetValue(key, out string fallback) ? fallback : key;
             return arguments.Length == 0 ? value : string.Format(CultureInfo.InvariantCulture, value, arguments);
+        }
+
+        public static string LifeRecoveryLabel()
+        {
+            if (!SaveService.TryGetLifeRecoveryRemaining(out int minutes, out int seconds))
+                return Get("lives_full");
+            return Get("life_recovery", minutes, seconds);
         }
 
         public static void ToggleLanguage()

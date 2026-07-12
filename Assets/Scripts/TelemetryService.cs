@@ -3,6 +3,20 @@ using UnityEngine;
 
 namespace LighthouseMatch3
 {
+    public interface ITelemetryStore
+    {
+        string GetString(string key, string defaultValue);
+        void SetString(string key, string value);
+        void Save();
+    }
+
+    public sealed class PlayerPrefsTelemetryStore : ITelemetryStore
+    {
+        public string GetString(string key, string defaultValue) => PlayerPrefs.GetString(key, defaultValue);
+        public void SetString(string key, string value) => PlayerPrefs.SetString(key, value);
+        public void Save() => PlayerPrefs.Save();
+    }
+
     [Serializable]
     public sealed class TelemetrySnapshot
     {
@@ -18,8 +32,34 @@ namespace LighthouseMatch3
     public static class TelemetryService
     {
         private const string Key = "lighthouse_match3_telemetry_v1";
+        private static ITelemetryStore _store = new PlayerPrefsTelemetryStore();
         private static TelemetrySnapshot _snapshot;
         private static bool _initialized;
+        private static bool _countErrors;
+
+        public static TelemetrySnapshot Snapshot
+        {
+            get
+            {
+                EnsureInitialized();
+                return _snapshot;
+            }
+        }
+
+        public static void ConfigureForTests(ITelemetryStore store)
+        {
+            ResetDependencies();
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+        }
+
+        public static void ResetDependencies()
+        {
+            if (_countErrors) Application.logMessageReceived -= CountErrors;
+            _store = new PlayerPrefsTelemetryStore();
+            _snapshot = null;
+            _initialized = false;
+            _countErrors = false;
+        }
 
         public static void Initialize()
         {
@@ -27,7 +67,7 @@ namespace LighthouseMatch3
             _initialized = true;
             try
             {
-                _snapshot = JsonUtility.FromJson<TelemetrySnapshot>(PlayerPrefs.GetString(Key, string.Empty));
+                _snapshot = JsonUtility.FromJson<TelemetrySnapshot>(_store.GetString(Key, string.Empty));
             }
             catch (ArgumentException)
             {
@@ -35,6 +75,7 @@ namespace LighthouseMatch3
             }
             _snapshot ??= new TelemetrySnapshot();
             Application.logMessageReceived += CountErrors;
+            _countErrors = true;
             _snapshot.SessionsStarted++;
             Persist();
         }
@@ -51,17 +92,22 @@ namespace LighthouseMatch3
                 Record(snapshot => snapshot.RuntimeErrors++);
         }
 
-        private static void Record(Action<TelemetrySnapshot> action)
+        private static void EnsureInitialized()
         {
             if (!_initialized) Initialize();
+        }
+
+        private static void Record(Action<TelemetrySnapshot> action)
+        {
+            EnsureInitialized();
             action(_snapshot);
             Persist();
         }
 
         private static void Persist()
         {
-            PlayerPrefs.SetString(Key, JsonUtility.ToJson(_snapshot));
-            PlayerPrefs.Save();
+            _store.SetString(Key, JsonUtility.ToJson(_snapshot));
+            _store.Save();
         }
     }
 }

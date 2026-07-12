@@ -5,6 +5,9 @@ namespace LighthouseMatch3
 {
     public static class BoardShuffler
     {
+        public static bool TryShuffleToPlayable(TileState[,] board, IGameRandom random, int maxAttempts = 128) =>
+            TryShuffleToPlayable(board, new RandomAdapter(random), maxAttempts);
+
         public static bool TryShuffleToPlayable(TileState[,] board, Random random, int maxAttempts = 128)
         {
             int width = board.GetLength(0);

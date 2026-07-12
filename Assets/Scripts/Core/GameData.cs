@@ -58,8 +58,31 @@ namespace LighthouseMatch3
     public static class LevelCatalog
     {
         public const int BoardSize = 8;
+        public const int LevelCount = 20;
 
-        public static LevelDefinition Get(int id)
+        private static ILevelCatalog _source = ProceduralLevelCatalog.Instance;
+
+        public static ILevelCatalog Source
+        {
+            get => _source;
+            set => _source = value ?? ProceduralLevelCatalog.Instance;
+        }
+
+        public static LevelDefinition Get(int id) => _source.Get(id);
+
+        public static void ResetSource() => _source = ProceduralLevelCatalog.Instance;
+    }
+
+    public interface ILevelCatalog
+    {
+        LevelDefinition Get(int id);
+    }
+
+    public sealed class ProceduralLevelCatalog : ILevelCatalog
+    {
+        public static ProceduralLevelCatalog Instance { get; } = new ProceduralLevelCatalog();
+
+        public LevelDefinition Get(int id)
         {
             int chapter = (id - 1) / 5;
             BlockerKind blocker = id < 4 ? BlockerKind.None : (BlockerKind)((id - 4) % 3 + 1);

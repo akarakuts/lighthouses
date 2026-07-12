@@ -1,5 +1,6 @@
-using NUnit.Framework;
 using LighthouseMatch3;
+using LighthouseMatch3.Tests;
+using NUnit.Framework;
 using System;
 
 public class Match3RulesTests
@@ -7,7 +8,7 @@ public class Match3RulesTests
     [Test]
     public void FindMatches_FindsHorizontalAndVerticalRuns()
     {
-        var board = NewBoard();
+        var board = TestFixtures.NewBoard();
         board[0, 0].Kind = TileKind.Coral;
         board[1, 0].Kind = TileKind.Coral;
         board[2, 0].Kind = TileKind.Coral;
@@ -35,7 +36,7 @@ public class Match3RulesTests
     [Test]
     public void HasAvailableMove_FindsAProductiveSwap()
     {
-        var board = NewBoard();
+        var board = TestFixtures.NewBoard();
         board[0, 0].Kind = TileKind.Coral;
         board[1, 0].Kind = TileKind.Coral;
         board[3, 0].Kind = TileKind.Coral;
@@ -47,7 +48,7 @@ public class Match3RulesTests
     [Test]
     public void HasAvailableMove_TreatsSpecialTileAsAValidMove()
     {
-        var board = NewNoMoveBoard();
+        var board = TestFixtures.NewNoMoveBoard();
         Assert.That(Match3Rules.HasAvailableMove(board), Is.False);
 
         board[1, 1].Special = SpecialKind.Beam;
@@ -58,7 +59,7 @@ public class Match3RulesTests
     [Test]
     public void BoardShuffler_CreatesPlayableBoardWithoutStartingMatches()
     {
-        var board = NewNoMoveBoard();
+        var board = TestFixtures.NewNoMoveBoard();
 
         bool shuffled = BoardShuffler.TryShuffleToPlayable(board, new Random(17));
 
@@ -70,7 +71,7 @@ public class Match3RulesTests
     [Test]
     public void BoardShuffler_PreservesSpecials()
     {
-        var board = NewNoMoveBoard();
+        var board = TestFixtures.NewNoMoveBoard();
         board[0, 0].Special = SpecialKind.Bomb;
 
         bool shuffled = BoardShuffler.TryShuffleToPlayable(board, new Random(31));
@@ -123,24 +124,6 @@ public class Match3RulesTests
         Assert.That(engine.Tiles[1, 2].Kind, Is.EqualTo(TileKind.Shell));
     }
 
-    private static TileState[,] NewBoard()
-    {
-        var board = new TileState[8, 8];
-        for (int y = 0; y < 8; y++)
-        for (int x = 0; x < 8; x++)
-            board[x, y] = new TileState((TileKind)((x * 2 + y * 3) % 6));
-        return board;
-    }
-
-    private static TileState[,] NewNoMoveBoard()
-    {
-        var board = new TileState[3, 3];
-        for (int y = 0; y < 3; y++)
-        for (int x = 0; x < 3; x++)
-            board[x, y] = new TileState((TileKind)((x + y) % 3));
-        return board;
-    }
-
     private static int CountSpecials(TileState[,] board, SpecialKind kind)
     {
         int count = 0;
@@ -148,5 +131,4 @@ public class Match3RulesTests
             if (tile.Special == kind) count++;
         return count;
     }
-
 }

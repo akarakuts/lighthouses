@@ -36,9 +36,10 @@ namespace LighthouseMatch3
             }
         }
 
-        public bool TryShuffleToPlayable(Random random)
-        {
-            return BoardShuffler.TryShuffleToPlayable(Tiles, random);
-        }
+        public bool TryShuffleToPlayable(Random random) =>
+            BoardShuffler.TryShuffleToPlayable(Tiles, random);
+
+        public bool TryShuffleToPlayable(IGameRandom random) =>
+            BoardShuffler.TryShuffleToPlayable(Tiles, random);
     }
 }

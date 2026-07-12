@@ -2,7 +2,9 @@
   "name": "LighthouseMatch3.PlayModeTests",
   "rootNamespace": "LighthouseMatch3.Tests",
   "references": [
-    "LighthouseMatch3.Runtime"
+    "LighthouseMatch3.Runtime",
+    "LighthouseMatch3.Core",
+    "LighthouseMatch3.TestFixtures"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

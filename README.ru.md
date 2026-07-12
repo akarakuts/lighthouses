@@ -6,7 +6,7 @@ English: [README.md](README.md)
 
 Репозиторий: **https://github.com/akarakuts/lighthouses**
 
-**Lighthouses: Mystery of the Archipelago** («Маяки: тайна архипелага») — офлайн match-3 для Android на **Unity 6000.3 LTS** и **C#** с UI, собираемым в рантайме. Меняйте соседние фишки, выполняйте цели уровней, восстанавливайте маяк на карте из 20 уровней. В версии 1.0 нет рекламы, аналитики и аккаунтов.
+**Lighthouses: Mystery of the Archipelago** («Маяки: тайна архипелага») — офлайн match-3 для Android на **Unity 6000.3 LTS** и **C#** с UI на **TextMeshPro**, собираемым в рантайме. Уровни — ScriptableObject в `Resources/Levels/` (с процедурным fallback). Меняйте соседние фишки, выполняйте цели уровней, восстанавливайте маяк на карте из 20 уровней. В версии 1.0 нет рекламы, аналитики и аккаунтов.
 
 ## Возможности
 
@@ -46,7 +46,8 @@ cd lighthouses
 
 - **EditMode** — `-executeMethod LighthouseMatch3.Editor.BatchTestRunner.RunEditModeTests` → `Release/editmode-tests.xml`.
 - **PlayMode** — `-runTests -testPlatform PlayMode` **без** `-quit`.
-- **Без Unity** — `dotnet run --project Tools/CoreRulesCheck`.
+- **Без Unity** — `dotnet run --project Tools/CoreRulesCheck/CoreRulesCheck.csproj`.
+- **Перегенерация уровней** — `dotnet run --project Tools/GenerateLevelAssets/GenerateLevelAssets.csproj` или **Lighthouses → Generate Level Assets** в Unity.
 
 Подробнее — раздел Testing в [README.md](README.md#testing).
 
@@ -58,6 +59,12 @@ cd lighthouses
 | `BuildProductionAndroid` | `Release/Lighthouses-<version>.aab` | upload keystore |
 
 Переменные окружения для production — в [README.md](README.md#android-release-builds). Материалы для магазина — каталог [`Release/`](Release/).
+
+## Граф кода (graphify)
+
+Интерактивный граф: `graphify-out/graph.html` (сборка: `graphify update .`).
+
+После клонирования: `uv tool install graphifyy`, автообновление при коммите: `graphify hook install`.
 
 ## Контакты
 

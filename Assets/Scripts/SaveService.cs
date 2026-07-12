@@ -122,6 +122,23 @@ namespace LighthouseMatch3
             return $"{remaining.Minutes:00}:{remaining.Seconds:00}";
         }
 
+        public static bool TryGetLifeRecoveryRemaining(out int minutes, out int seconds)
+        {
+            EnsureLoaded();
+            RefreshLives();
+            if (Progress.Lives >= MaxLives)
+            {
+                minutes = seconds = 0;
+                return false;
+            }
+            long elapsed = _clock.UtcNow.Ticks - Progress.LastLifeUtcTicks;
+            long cycle = TimeSpan.FromMinutes(LifeRecoveryMinutes).Ticks;
+            TimeSpan remaining = TimeSpan.FromTicks(Math.Max(0L, cycle - elapsed));
+            minutes = remaining.Minutes;
+            seconds = remaining.Seconds;
+            return true;
+        }
+
         public static void LoseLife()
         {
             EnsureLoaded();

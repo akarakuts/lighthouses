@@ -25,7 +25,8 @@ The project builds all gameplay UI at runtime (colored tiles and labels) so it i
 |------|--------|
 | Engine | Unity 6000.3 LTS, 2D, IL2CPP |
 | Language | C# |
-| UI | Unity UI (runtime-generated Canvas) |
+| UI | TextMeshPro + Unity UI (runtime-generated Canvas) |
+| Levels | ScriptableObject assets in `Resources/Levels/` with procedural fallback |
 | Save | PlayerPrefs + `JsonUtility` |
 | Tests | Unity Test Framework (EditMode + PlayMode), NUnit |
 | CI | GitHub Actions + [Game CI](https://game.ci/) |
@@ -84,8 +85,16 @@ Do **not** pass `-quit` for PlayMode — Unity must finish the PlayMode domain r
 **Core rules without Unity:**
 
 ```bash
-dotnet run --project Tools/CoreRulesCheck
+dotnet run --project Tools/CoreRulesCheck/CoreRulesCheck.csproj
 ```
+
+**Regenerate level ScriptableObject assets:**
+
+```bash
+dotnet run --project Tools/GenerateLevelAssets/GenerateLevelAssets.csproj
+```
+
+Or in Unity: **Lighthouses → Generate Level Assets**.
 
 | Suite | Location | Coverage |
 |-------|----------|----------|
@@ -120,14 +129,23 @@ Store listing copy, privacy policy draft, QA checklist, and store graphics live 
 
 | Path | Role |
 |------|------|
-| `Assets/Scripts/Match3Rules.cs`, `BoardEngine.cs`, `BoardShuffler.cs` | Pure match-3 logic |
-| `Assets/Scripts/Match3GameController.cs` | Game loop, UI, level flow |
-| `Assets/Scripts/SaveService.cs`, `LocalizationService.cs` | Progress and i18n |
+| `Assets/Scripts/Core/` | Pure match-3 domain (`Match3Rules`, `MatchResolver`, `Match3LevelSession`, `BoardGenerator`) |
+| `Assets/Scripts/UI/` | Runtime UI views, `UiAnimation`, `GamePalette` |
+| `Assets/Resources/Levels/` | ScriptableObject level definitions (auto-generated via **Lighthouses → Generate Level Assets**) |
+| `Assets/Scripts/Match3GameController.cs` | Game orchestration (~200 lines) |
+| `Assets/Scripts/SaveService.cs`, `LocalizationService.cs`, `TelemetryService.cs` | Progress, i18n, local telemetry |
 | `Assets/Editor/BuildCommandLine.cs`, `BatchTestRunner.cs` | CLI build and tests |
-| `Tools/CoreRulesCheck/` | Standalone rule smoke tests |
+| `Tools/CoreRulesCheck/` | Standalone rule smoke tests (`CoreRulesCheck.csproj`) |
+| `Tools/GenerateLevelAssets/` | Regenerates `Assets/Resources/Levels/*.asset` from procedural catalog |
 | `Release/` | Play handoff docs and store assets (binaries gitignored) |
+| `graphify-out/` | Code knowledge graph (`graphify update .` after changes) |
 
-## Contact
+## Code graph (graphify)
+
+Interactive architecture graph: `graphify-out/graph.html` (build with `graphify update .`).
+
+After clone, install the CLI once: `uv tool install graphifyy`. Enable auto-rebuild on commit: `graphify hook install`.
+
 
 **Aleksey Karakuts** — [aleksey@karakuts.com](mailto:aleksey@karakuts.com)
 

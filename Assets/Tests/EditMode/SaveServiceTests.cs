@@ -1,27 +1,24 @@
 using System;
-using System.Collections.Generic;
 using LighthouseMatch3;
+using LighthouseMatch3.Tests;
 using NUnit.Framework;
 using UnityEngine;
 
 public sealed class SaveServiceTests
 {
     private MemoryStore _store;
-    private MutableClock _clock;
+    private FixedClock _clock;
 
     [SetUp]
     public void SetUp()
     {
         _store = new MemoryStore();
-        _clock = new MutableClock(new DateTime(2026, 7, 12, 10, 0, 0, DateTimeKind.Utc));
+        _clock = new FixedClock(new DateTime(2026, 7, 12, 10, 0, 0, DateTimeKind.Utc));
         SaveService.ConfigureForTests(_store, _clock);
     }
 
     [TearDown]
-    public void TearDown()
-    {
-        SaveService.ResetDependencies();
-    }
+    public void TearDown() => SaveService.ResetDependencies();
 
     [Test]
     public void Load_RecoversLivesUsingInjectedClock()
@@ -75,24 +72,5 @@ public sealed class SaveServiceTests
 
         Assert.That(SaveService.Progress.Coins, Is.EqualTo(startingCoins + 15));
         Assert.That(SaveService.Progress.Stars, Is.EqualTo(2));
-    }
-
-    private sealed class MutableClock : IUtcClock
-    {
-        public MutableClock(DateTime utcNow) => UtcNow = utcNow;
-        public DateTime UtcNow { get; set; }
-    }
-
-    private sealed class MemoryStore : IProgressStore
-    {
-        private readonly Dictionary<string, string> _values = new Dictionary<string, string>();
-
-        public string GetString(string key, string defaultValue)
-        {
-            return _values.TryGetValue(key, out string value) ? value : defaultValue;
-        }
-
-        public void SetString(string key, string value) => _values[key] = value;
-        public void Save() { }
     }
 }

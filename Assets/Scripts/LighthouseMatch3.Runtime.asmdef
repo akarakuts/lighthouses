@@ -2,6 +2,8 @@
   "name": "LighthouseMatch3.Runtime",
   "rootNamespace": "LighthouseMatch3",
   "references": [
+    "LighthouseMatch3.Core",
+    "Unity.TextMeshPro",
     "UnityEngine.UI"
   ],
   "includePlatforms": [],

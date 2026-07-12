@@ -1,0 +1,17 @@
+{
+  "name": "LighthouseMatch3.TestFixtures",
+  "rootNamespace": "LighthouseMatch3.Tests",
+  "references": [
+    "LighthouseMatch3.Core",
+    "LighthouseMatch3.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

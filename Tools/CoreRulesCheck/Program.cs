@@ -10,6 +10,7 @@ internal static class Program
             FindsHorizontalAndVerticalRuns();
             ValidatesAdjacency();
             FindsProductiveSwap();
+            ValidatesBeamSpecialCreation();
             Console.WriteLine("Core match-3 smoke tests passed.");
             return 0;
         }
@@ -52,6 +53,16 @@ internal static class Program
         board[2, 1].Kind = TileKind.Coral;
 
         Require(Match3Rules.HasAvailableMove(board), "A productive swap should be available.");
+    }
+
+    private static void ValidatesBeamSpecialCreation()
+    {
+        TileState[,] board = NewBoard();
+        for (int x = 0; x < 4; x++) board[x, 0].Kind = TileKind.Coral;
+        var matches = Match3Rules.FindMatches(board);
+        BoardPoint[] swapped = { new BoardPoint(2, 0), new BoardPoint(3, 0) };
+        SpecialKind created = SpecialTileRules.PickCreatedSpecial(board, 8, matches, swapped);
+        Require(created == SpecialKind.Beam, "Four in a row should create a beam special.");
     }
 
     private static TileState[,] NewBoard()

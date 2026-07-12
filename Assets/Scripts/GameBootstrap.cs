@@ -18,6 +18,7 @@ namespace LighthouseMatch3
             Application.targetFrameRate = 60;
             Screen.orientation = ScreenOrientation.Portrait;
             SaveService.Load();
+            LevelCatalog.Source = new ResourcesLevelCatalog();
             TelemetryService.Initialize();
             if (FindFirstObjectByType<EventSystem>() == null)
             {

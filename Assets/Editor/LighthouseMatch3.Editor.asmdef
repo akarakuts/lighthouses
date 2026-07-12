@@ -1,0 +1,23 @@
+{
+  "name": "LighthouseMatch3.Editor",
+  "rootNamespace": "LighthouseMatch3.Editor",
+  "references": [
+    "LighthouseMatch3.Core",
+    "LighthouseMatch3.Runtime",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

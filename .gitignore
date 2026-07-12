@@ -23,5 +23,10 @@ Release/qa-*/
 Tools/bin/
 Tools/CoreRulesCheck/bin/
 Tools/CoreRulesCheck/obj/
+Tools/GenerateLevelAssets/bin/
+Tools/GenerateLevelAssets/obj/
 Release/editmode-results.xml
 Release/emulator-first-screen.png
+
+# Graphify AST cache (regenerated locally; commit graph.json/graph.html/GRAPH_REPORT.md)
+graphify-out/

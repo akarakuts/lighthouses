@@ -6,6 +6,27 @@ on:
     branches: [master, main]
 
 jobs:
+  core-rules:
+    name: Core rules (dotnet)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - run: dotnet run --project Tools/CoreRulesCheck/CoreRulesCheck.csproj
+
+  level-assets:
+    name: Level assets sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - run: dotnet run --project Tools/GenerateLevelAssets/GenerateLevelAssets.csproj
+      - run: git diff --exit-code Assets/Resources/Levels/
+
   editmode:
     name: EditMode tests
     runs-on: ubuntu-latest
