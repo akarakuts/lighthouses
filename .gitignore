@@ -21,3 +21,7 @@ Release/*.log
 Release/*-tests.xml
 Release/qa-*/
 Tools/bin/
+Tools/CoreRulesCheck/bin/
+Tools/CoreRulesCheck/obj/
+Release/editmode-results.xml
+Release/emulator-first-screen.png
