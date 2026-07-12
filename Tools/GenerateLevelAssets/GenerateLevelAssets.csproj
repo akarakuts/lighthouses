@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>LighthouseMatch3.Tools</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Assets/Scripts/Core/GameData.cs" Link="GameData.cs" />
+    <Compile Include="../../Assets/Scripts/Core/BlockerRules.cs" Link="BlockerRules.cs" />
+  </ItemGroup>
+</Project>

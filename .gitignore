@@ -6,13 +6,14 @@
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 *.csproj
+!Tools/**/*.csproj
 *.sln
 *.user
 *.userprefs
 .vs/
 .idea/
 .utmp/
-
+.cursor/
 # Generated Android bundles, test reports and diagnostic logs.
 Release/*.aab
 Release/*.apk

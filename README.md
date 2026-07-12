@@ -60,7 +60,21 @@ Tap one tile, then an adjacent tile to swap. A valid swap must create a match (o
 |----------|---------|---------|
 | [Unity Quality](.github/workflows/unity-quality.yml) | push / PR to `master` or `main` | EditMode and PlayMode tests via Game CI |
 
-Configure repository secret **`UNITY_LICENSE`** (Unity activation file) for CI. Without it, Game CI jobs fail until the license is added.
+Configure repository secrets for Unity CI (one-time):
+
+```bash
+./Tools/ci/setup-github-secrets.sh
+```
+
+Required for EditMode/PlayMode jobs: **`UNITY_LICENSE`** (`.ulf` from Unity Hub), **`UNITY_EMAIL`**, **`UNITY_PASSWORD`**. Pro/Plus licenses also need **`UNITY_SERIAL`**.
+
+| Job | Requirements |
+|-----|--------------|
+| Core rules | .NET 10 only |
+| Level assets sync | .NET 10 only |
+| EditMode / PlayMode | Unity secrets above |
+
+Without Unity secrets, Game CI test jobs fail; dotnet jobs run without a license.
 
 ## Testing
 

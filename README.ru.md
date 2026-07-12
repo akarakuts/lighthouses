@@ -40,7 +40,23 @@ cd lighthouses
 
 ## CI (GitHub Actions)
 
-Как в англ. README: workflow [Unity Quality](.github/workflows/unity-quality.yml) — EditMode и PlayMode через Game CI при push/PR в `master` или `main`. Нужен секрет **`UNITY_LICENSE`**.
+Workflow [Unity Quality](.github/workflows/unity-quality.yml) — 4 job'а при push/PR в `main`:
+
+| Job | Требования |
+|-----|------------|
+| Core rules | только .NET 10 |
+| Level assets sync | только .NET 10 |
+| EditMode / PlayMode | секреты Unity (см. ниже) |
+
+**Настройка Unity-секретов** (один раз):
+
+```bash
+./Tools/ci/setup-github-secrets.sh
+```
+
+Нужны `UNITY_LICENSE` (файл `.ulf` из Unity Hub), `UNITY_EMAIL` и `UNITY_PASSWORD`. Для Pro/Plus — ещё `UNITY_SERIAL`. Если `.ulf` нет — сначала активируйте personal license в Unity Hub (Settings → Licenses → Add).
+
+Альтернатива: workflow [Unity License Activation](.github/workflows/unity-activation.yml) → скачать `.alf`, активировать на license.unity3d.com, положить `.ulf` в секрет.
 
 ## Тесты
 
