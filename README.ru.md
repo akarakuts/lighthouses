@@ -43,28 +43,13 @@ cd lighthouses
 | Workflow | Триггер | Назначение |
 |----------|---------|------------|
 | [Unity Quality](.github/workflows/unity-quality.yml) | push / PR в `main` | dotnet smoke + синхронизация level assets |
-| [Release Build](.github/workflows/release.yml) | тег `v*` | сборка Android AAB + GitHub Release |
+| [Release Build](.github/workflows/release.yml) | тег `v*` | сборка AAB на self-hosted Mac runner + GitHub Release |
 
-**Настройка Unity-секретов** (один раз):
+**Release Build** использует **self-hosted runner** на Mac с активированной Unity Personal (в Unity 6 нет `.ulf` для Game CI). Регистрация runner — см. [README.md](README.md#ci--automation).
 
-```bash
-./Tools/ci/setup-github-secrets.sh
-```
+Подпись production на runner берётся из `~/secrets/lighthouses-rustore/credentials.env`, если файл есть.
 
-Для **Release Build** нужны `UNITY_LICENSE` (`.ulf` из Unity Hub), `UNITY_EMAIL` и `UNITY_PASSWORD`. Для Pro/Plus — ещё `UNITY_SERIAL`.
-
-Опционально для подписанного AAB в CI: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEYALIAS_NAME`, `ANDROID_KEYALIAS_PASSWORD`.
-
-Релиз:
-
-```bash
-git tag v1.0.2
-git push origin v1.0.2
-```
-
-Тег должен совпадать с `ProjectSettings.bundleVersion`. EditMode/PlayMode в Unity Quality — только через `workflow_dispatch` с `run_unity_tests=true`.
-
-Альтернатива для лицензии: workflow [Unity License Activation](.github/workflows/unity-activation.yml) → скачать `.alf`, активировать на license.unity3d.com, положить `.ulf` в секрет `UNITY_LICENSE`.
+Секреты Unity (`UNITY_LICENSE`, `UNITY_EMAIL`, `UNITY_PASSWORD`) нужны только для ручных Unity-тестов через `workflow_dispatch`.
 
 ## Тесты
 

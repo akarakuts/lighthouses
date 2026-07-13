@@ -59,7 +59,7 @@ Tap one tile, then an adjacent tile to swap. A valid swap must create a match (o
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
 | [Unity Quality](.github/workflows/unity-quality.yml) | push / PR to `main` | dotnet smoke + level asset sync |
-| [Release Build](.github/workflows/release.yml) | tag `v*` | Android AAB build + GitHub Release |
+| [Release Build](.github/workflows/release.yml) | tag `v*` | Android AAB build on self-hosted Mac runner + GitHub Release |
 
 Configure repository secrets for Unity CI (one-time):
 
@@ -67,18 +67,20 @@ Configure repository secrets for Unity CI (one-time):
 ./Tools/ci/setup-github-secrets.sh
 ```
 
-Required for **Release Build** and optional Unity tests: **`UNITY_LICENSE`** (`.ulf` from Unity Hub), **`UNITY_EMAIL`**, **`UNITY_PASSWORD`**. Pro/Plus licenses also need **`UNITY_SERIAL`**.
+**Release Build** uses a **self-hosted macOS runner** with a locally activated Unity Personal license (Unity 6 no longer generates `.ulf` files for Game CI). One-time setup on the build Mac:
 
-Optional production signing for tag builds:
+```bash
+# register runner (token from GitHub → Settings → Actions → Runners)
+mkdir -p ~/actions-runner-lighthouses && cd ~/actions-runner-lighthouses
+curl -fsSL -o actions-runner.tar.gz -L https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-osx-arm64-2.321.0.tar.gz
+tar xzf actions-runner.tar.gz
+./config.sh --url https://github.com/akarakuts/lighthouses --token <TOKEN> --name macbook-unity --labels self-hosted,macOS,unity --unattended
+./run.sh
+```
 
-| Secret | Purpose |
-|--------|---------|
-| `ANDROID_KEYSTORE_BASE64` | Upload keystore (`base64 -i upload.keystore`) |
-| `ANDROID_KEYSTORE_PASSWORD` | Keystore password |
-| `ANDROID_KEYALIAS_NAME` | Key alias |
-| `ANDROID_KEYALIAS_PASSWORD` | Key password |
+Production signing on the runner reads `~/secrets/lighthouses-rustore/credentials.env` when present.
 
-Without signing secrets, tag builds produce a debug-signed AAB.
+Optional Unity test secrets (`UNITY_LICENSE`, `UNITY_EMAIL`, `UNITY_PASSWORD`) are only needed for manual `workflow_dispatch` Unity Quality jobs.
 
 | Job | Requirements |
 |-----|--------------|
