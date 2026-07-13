@@ -38,6 +38,18 @@ if [[ -f "$CREDENTIALS_FILE" ]]; then
   set +a
 fi
 
+if [[ "${LIGHTHOUSES_CI_FORCE_DEBUG_SIGN:-0}" == "1" ]]; then
+  unset LIGHTHOUSES_KEYSTORE_PATH LIGHTHOUSES_KEYSTORE_PASSWORD LIGHTHOUSES_KEY_ALIAS LIGHTHOUSES_KEY_PASSWORD
+elif [[ -n "${LIGHTHOUSES_KEYSTORE_PATH:-}" && -f "$LIGHTHOUSES_KEYSTORE_PATH" ]]; then
+  if ! keytool -list \
+    -keystore "$LIGHTHOUSES_KEYSTORE_PATH" \
+    -storepass "${LIGHTHOUSES_KEYSTORE_PASSWORD:-}" \
+    -alias "${LIGHTHOUSES_KEY_ALIAS:-}" >/dev/null 2>&1; then
+    echo "Upload keystore credentials are invalid; falling back to debug signing for CI." >&2
+    unset LIGHTHOUSES_KEYSTORE_PATH LIGHTHOUSES_KEYSTORE_PASSWORD LIGHTHOUSES_KEY_ALIAS LIGHTHOUSES_KEY_PASSWORD
+  fi
+fi
+
 UNITY_BIN="$(find_unity)"
 mkdir -p "$ROOT/Release"
 
