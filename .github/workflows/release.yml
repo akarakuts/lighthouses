@@ -56,6 +56,9 @@ jobs:
     needs: validate
     runs-on: [self-hosted, macOS, unity]
     steps:
+      - name: Prepare runner PATH
+        run: echo "/opt/homebrew/bin" >> "$GITHUB_PATH"
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref }}
