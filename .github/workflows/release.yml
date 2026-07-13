@@ -60,7 +60,6 @@ jobs:
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag_name || github.ref }}
           fetch-depth: 0
-          lfs: true
 
       - name: Resolve release version
         id: version
