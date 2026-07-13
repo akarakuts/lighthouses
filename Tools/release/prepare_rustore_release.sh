@@ -57,3 +57,7 @@ Production build example:
   export LIGHTHOUSES_KEY_PASSWORD=...
   Tools/release/build_production_aab.sh
 EOF
+
+echo
+echo "[handoff] Sync artifacts to RuStore folder"
+"$ROOT/Tools/release/sync_rustore_handoff.sh"

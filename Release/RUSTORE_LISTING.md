@@ -61,11 +61,13 @@
 | Файл | Назначение |
 | --- | --- |
 | `StoreAssets/app-icon-512x512.png` | Иконка 512×512, PNG/JPG, до 3 МБ, без прозрачных краёв |
-| `StoreAssets/screenshots/01-map.png` | Скриншот карты |
-| `StoreAssets/screenshots/02-gameplay.png` | Скриншот геймплея |
-| `StoreAssets/screenshots/03-map-alt.png` | Дополнительный скриншот |
+| `StoreAssets/screenshots/rustore-01-map.png` | Карта уровней |
+| `StoreAssets/screenshots/rustore-02-gameplay.png` | Геймплей match-3 |
+| `StoreAssets/screenshots/rustore-03-rules.png` | Экран правил |
+| `StoreAssets/screenshots/rustore-04-settings.png` | Настройки |
+| `StoreAssets/screenshots/rustore-05-lighthouse.png` | Восстановление маяка |
 
-Рекомендация RuStore: соотношение сторон 16:9. Текущие скриншоты 1080×2400 (20:9) — консоль может обрезать края. Перед финальной публикацией желательно сделать 4+ скриншота с реального устройства в 1080×1920.
+Все скриншоты: **1080×1920 PNG**, ≤3 МБ, без системной строки Android. Переснять: `Tools/release/capture_rustore_screenshots.sh`.
 
 ## Безопасность данных
 
