@@ -30,6 +30,20 @@ if pgrep -f "Unity.*$ROOT" >/dev/null 2>&1; then
   exit 1
 fi
 
+validate_upload_keystore() {
+  command -v jarsigner >/dev/null || return 1
+  local tmpdir tmpjar
+  tmpdir="$(mktemp -d)"
+  tmpjar="$tmpdir/test.jar"
+  echo test > "$tmpdir/test.txt"
+  (cd "$tmpdir" && jar cf test.jar test.txt)
+  jarsigner \
+    -keystore "$LIGHTHOUSES_KEYSTORE_PATH" \
+    -storepass "${LIGHTHOUSES_KEYSTORE_PASSWORD:-}" \
+    -keypass "${LIGHTHOUSES_KEY_PASSWORD:-}" \
+    "$tmpjar" "${LIGHTHOUSES_KEY_ALIAS:-}" >/dev/null 2>&1
+}
+
 CREDENTIALS_FILE="${LIGHTHOUSES_CREDENTIALS_FILE:-$HOME/secrets/lighthouses-rustore/credentials.env}"
 if [[ -f "$CREDENTIALS_FILE" ]]; then
   set -a
@@ -41,10 +55,7 @@ fi
 if [[ "${LIGHTHOUSES_CI_FORCE_DEBUG_SIGN:-0}" == "1" ]]; then
   unset LIGHTHOUSES_KEYSTORE_PATH LIGHTHOUSES_KEYSTORE_PASSWORD LIGHTHOUSES_KEY_ALIAS LIGHTHOUSES_KEY_PASSWORD
 elif [[ -n "${LIGHTHOUSES_KEYSTORE_PATH:-}" && -f "$LIGHTHOUSES_KEYSTORE_PATH" ]]; then
-  if ! keytool -list \
-    -keystore "$LIGHTHOUSES_KEYSTORE_PATH" \
-    -storepass "${LIGHTHOUSES_KEYSTORE_PASSWORD:-}" \
-    -alias "${LIGHTHOUSES_KEY_ALIAS:-}" >/dev/null 2>&1; then
+  if ! validate_upload_keystore; then
     echo "Upload keystore credentials are invalid; falling back to debug signing for CI." >&2
     unset LIGHTHOUSES_KEYSTORE_PATH LIGHTHOUSES_KEYSTORE_PASSWORD LIGHTHOUSES_KEY_ALIAS LIGHTHOUSES_KEY_PASSWORD
   fi
