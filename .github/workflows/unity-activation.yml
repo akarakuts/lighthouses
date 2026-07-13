@@ -4,16 +4,30 @@ on:
   workflow_dispatch:
 
 jobs:
-  activation:
-    name: Request manual activation file
+  instructions:
+    name: License setup instructions
     runs-on: ubuntu-latest
     steps:
-      - name: Request manual activation file
-        id: getManualLicenseFile
-        uses: game-ci/unity-request-activation-file@v2
+      - name: Print activation steps
+        run: |
+          cat <<'EOF'
+          game-ci/unity-request-activation-file@v2 is deprecated.
 
-      - name: Expose as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.getManualLicenseFile.outputs.filePath }}
-          path: ${{ steps.getManualLicenseFile.outputs.filePath }}
+          To enable Release Build and Unity tests:
+
+          1. On a machine with Unity Hub, activate a personal license:
+             Unity Hub → Settings → Licenses → Add → Get a free personal license
+
+          2. Locate Unity_lic.ulf:
+             macOS: /Library/Application Support/Unity/Unity_lic.ulf
+             Windows: C:\ProgramData\Unity\Unity_lic.ulf
+             Linux: ~/.local/share/unity3d/Unity/Unity_lic.ulf
+
+          3. Upload secrets:
+             ./Tools/ci/setup-github-secrets.sh
+
+          Required secrets: UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD
+          Pro/Plus also needs: UNITY_SERIAL
+
+          Docs: https://game.ci/docs/github/activation
+          EOF
