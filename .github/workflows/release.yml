@@ -1,0 +1,162 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  UNITY_VERSION: 6000.3.19f1
+
+jobs:
+  validate:
+    name: Validate (dotnet)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Core rules smoke
+        run: dotnet run --project Tools/CoreRulesCheck/CoreRulesCheck.csproj
+
+      - name: Level assets sync
+        run: |
+          dotnet run --project Tools/GenerateLevelAssets/GenerateLevelAssets.csproj
+          git diff --exit-code Assets/Resources/Levels/
+
+      - name: Resolve release version
+        id: version
+        run: |
+          set -euo pipefail
+          TAG_NAME="${GITHUB_REF_NAME#v}"
+          PROJECT_VERSION=$(awk '/^  bundleVersion:/{print $2}' ProjectSettings/ProjectSettings.asset)
+          VERSION_CODE=$(awk '/^  AndroidBundleVersionCode:/{print $2}' ProjectSettings/ProjectSettings.asset)
+          if [[ "$TAG_NAME" != "$PROJECT_VERSION" ]]; then
+            echo "Tag version ($TAG_NAME) must match ProjectSettings.bundleVersion ($PROJECT_VERSION)." >&2
+            exit 1
+          fi
+          echo "name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+
+  build-android:
+    name: Build Android AAB
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Unity license secret
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          if [[ -z "$UNITY_LICENSE" ]]; then
+            echo "::error::Missing UNITY_LICENSE secret. Run Tools/ci/setup-github-secrets.sh on a machine with Unity Hub."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Resolve release version
+        id: version
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME#v}"
+          VERSION_CODE=$(awk '/^  AndroidBundleVersionCode:/{print $2}' ProjectSettings/ProjectSettings.asset)
+          echo "name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare upload keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEYALIAS_NAME: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          ANDROID_KEYALIAS_PASSWORD: ${{ secrets.ANDROID_KEYALIAS_PASSWORD }}
+        run: |
+          if [[ -z "$ANDROID_KEYSTORE_BASE64" ]]; then
+            echo "No ANDROID_KEYSTORE_BASE64 secret; CI will produce a debug-signed AAB."
+            exit 0
+          fi
+          KEYSTORE_PATH="$RUNNER_TEMP/upload.keystore"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$KEYSTORE_PATH"
+          {
+            echo "LIGHTHOUSES_KEYSTORE_PATH=$KEYSTORE_PATH"
+            echo "LIGHTHOUSES_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
+            echo "LIGHTHOUSES_KEY_ALIAS=$ANDROID_KEYALIAS_NAME"
+            echo "LIGHTHOUSES_KEY_PASSWORD=$ANDROID_KEYALIAS_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - uses: jlumbroso/free-disk-space@v1.3.1
+
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Android-${{ env.UNITY_VERSION }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-Android-${{ env.UNITY_VERSION }}-
+            Library-
+
+      - uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          LIGHTHOUSES_VERSION_NAME: ${{ steps.version.outputs.name }}
+          LIGHTHOUSES_VERSION_CODE: ${{ steps.version.outputs.code }}
+          LIGHTHOUSES_KEYSTORE_PATH: ${{ env.LIGHTHOUSES_KEYSTORE_PATH }}
+          LIGHTHOUSES_KEYSTORE_PASSWORD: ${{ env.LIGHTHOUSES_KEYSTORE_PASSWORD }}
+          LIGHTHOUSES_KEY_ALIAS: ${{ env.LIGHTHOUSES_KEY_ALIAS }}
+          LIGHTHOUSES_KEY_PASSWORD: ${{ env.LIGHTHOUSES_KEY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: Android
+          androidExportType: androidAppBundle
+          buildMethod: LighthouseMatch3.Editor.BuildCommandLine.BuildCiReleaseAndroid
+          buildsPath: build/Android
+
+      - name: Collect AAB artifact
+        run: |
+          mkdir -p Release
+          AAB_PATH=$(find Release build -name '*.aab' 2>/dev/null | head -n 1)
+          if [[ -z "$AAB_PATH" ]]; then
+            echo "AAB not found under Release/ or build/" >&2
+            find . -name '*.aab' || true
+            exit 1
+          fi
+          cp "$AAB_PATH" "Release/Lighthouses-${{ steps.version.outputs.name }}.aab"
+          ls -lah Release/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-aab-${{ steps.version.outputs.name }}
+          path: Release/Lighthouses-${{ steps.version.outputs.name }}.aab
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: build-android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve release version
+        id: version
+        run: echo "name=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: android-aab-${{ steps.version.outputs.name }}
+          path: Release
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Lighthouses ${{ steps.version.outputs.name }}
+          generate_release_notes: true
+          files: Release/Lighthouses-${{ steps.version.outputs.name }}.aab

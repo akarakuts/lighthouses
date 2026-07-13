@@ -58,7 +58,8 @@ Tap one tile, then an adjacent tile to swap. A valid swap must create a match (o
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| [Unity Quality](.github/workflows/unity-quality.yml) | push / PR to `master` or `main` | EditMode and PlayMode tests via Game CI |
+| [Unity Quality](.github/workflows/unity-quality.yml) | push / PR to `main` | dotnet smoke + level asset sync |
+| [Release Build](.github/workflows/release.yml) | tag `v*` | Android AAB build + GitHub Release |
 
 Configure repository secrets for Unity CI (one-time):
 
@@ -66,13 +67,32 @@ Configure repository secrets for Unity CI (one-time):
 ./Tools/ci/setup-github-secrets.sh
 ```
 
-Required for EditMode/PlayMode jobs: **`UNITY_LICENSE`** (`.ulf` from Unity Hub), **`UNITY_EMAIL`**, **`UNITY_PASSWORD`**. Pro/Plus licenses also need **`UNITY_SERIAL`**.
+Required for **Release Build** and optional Unity tests: **`UNITY_LICENSE`** (`.ulf` from Unity Hub), **`UNITY_EMAIL`**, **`UNITY_PASSWORD`**. Pro/Plus licenses also need **`UNITY_SERIAL`**.
+
+Optional production signing for tag builds:
+
+| Secret | Purpose |
+|--------|---------|
+| `ANDROID_KEYSTORE_BASE64` | Upload keystore (`base64 -i upload.keystore`) |
+| `ANDROID_KEYSTORE_PASSWORD` | Keystore password |
+| `ANDROID_KEYALIAS_NAME` | Key alias |
+| `ANDROID_KEYALIAS_PASSWORD` | Key password |
+
+Without signing secrets, tag builds produce a debug-signed AAB.
 
 | Job | Requirements |
 |-----|--------------|
 | Core rules | .NET 10 only |
 | Level assets sync | .NET 10 only |
-| EditMode / PlayMode | Unity secrets above |
+| EditMode / PlayMode | Manual `workflow_dispatch` with `run_unity_tests=true` |
+| Release Build | Tag `vX.Y.Z` matching `ProjectSettings.bundleVersion` + Unity secrets |
+
+Create a release:
+
+```bash
+git tag v1.0.2
+git push origin v1.0.2
+```
 
 Without Unity secrets, Game CI test jobs fail; dotnet jobs run without a license.
 

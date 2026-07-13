@@ -5,6 +5,11 @@ on:
   push:
     branches: [master, main]
   workflow_dispatch:
+    inputs:
+      run_unity_tests:
+        description: Run Unity EditMode/PlayMode jobs (requires UNITY_LICENSE)
+        type: boolean
+        default: false
 
 jobs:
   core-rules:
@@ -30,9 +35,18 @@ jobs:
 
   editmode:
     name: EditMode tests
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_unity_tests }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check Unity license secret
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          if [[ -z "$UNITY_LICENSE" ]]; then
+            echo "::error::Missing UNITY_LICENSE secret. Run Tools/ci/setup-github-secrets.sh"
+            exit 1
+          fi
       - uses: game-ci/unity-test-runner@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -46,9 +60,18 @@ jobs:
 
   playmode:
     name: PlayMode tests
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_unity_tests }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check Unity license secret
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          if [[ -z "$UNITY_LICENSE" ]]; then
+            echo "::error::Missing UNITY_LICENSE secret. Run Tools/ci/setup-github-secrets.sh"
+            exit 1
+          fi
       - uses: game-ci/unity-test-runner@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}

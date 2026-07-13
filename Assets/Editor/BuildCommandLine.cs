@@ -30,6 +30,13 @@ namespace LighthouseMatch3.Editor
             BuildValidationAndroid();
         }
 
+        public static void BuildCiReleaseAndroid()
+        {
+            ApplyReleaseVersion(allowProjectDefaults: true);
+            bool requireUploadKey = HasUploadKey();
+            BuildAndroidBundle($"Release/Lighthouses-{PlayerSettings.bundleVersion}.aab", requireUploadKey);
+        }
+
         private static void BuildAndroidBundle(string outputPath, bool requireUploadKey, BuildOptions options = BuildOptions.None)
         {
             Directory.CreateDirectory("Release");
@@ -54,25 +61,43 @@ namespace LighthouseMatch3.Editor
             UnityEngine.Debug.Log($"Android App Bundle created at {Path.GetFullPath(outputPath)}");
         }
 
-        private static void ApplyReleaseVersion()
+        private static void ApplyReleaseVersion(bool allowProjectDefaults = false)
         {
             string versionName = Environment.GetEnvironmentVariable("LIGHTHOUSES_VERSION_NAME");
             string versionCodeText = Environment.GetEnvironmentVariable("LIGHTHOUSES_VERSION_CODE");
-            if (string.IsNullOrWhiteSpace(versionName) || !int.TryParse(versionCodeText, out int versionCode) || versionCode < 1)
+            bool hasName = !string.IsNullOrWhiteSpace(versionName);
+            bool hasCode = int.TryParse(versionCodeText, out int versionCode) && versionCode >= 1;
+
+            if (!hasName || !hasCode)
+            {
+                if (allowProjectDefaults)
+                    return;
+
                 throw new BuildFailedException("Production builds require LIGHTHOUSES_VERSION_NAME and a positive LIGHTHOUSES_VERSION_CODE.");
+            }
 
             PlayerSettings.bundleVersion = versionName;
             PlayerSettings.Android.bundleVersionCode = versionCode;
         }
 
-        private static void ConfigureSigning(bool requireUploadKey)
+        private static bool HasUploadKey()
         {
             string path = Environment.GetEnvironmentVariable("LIGHTHOUSES_KEYSTORE_PATH");
             string storePassword = Environment.GetEnvironmentVariable("LIGHTHOUSES_KEYSTORE_PASSWORD");
             string alias = Environment.GetEnvironmentVariable("LIGHTHOUSES_KEY_ALIAS");
             string keyPassword = Environment.GetEnvironmentVariable("LIGHTHOUSES_KEY_PASSWORD");
-            bool hasUploadKey = !string.IsNullOrWhiteSpace(path) && !string.IsNullOrWhiteSpace(storePassword)
-                && !string.IsNullOrWhiteSpace(alias) && !string.IsNullOrWhiteSpace(keyPassword);
+            return !string.IsNullOrWhiteSpace(path) && !string.IsNullOrWhiteSpace(storePassword)
+                && !string.IsNullOrWhiteSpace(alias) && !string.IsNullOrWhiteSpace(keyPassword)
+                && File.Exists(path);
+        }
+
+        private static void ConfigureSigning(bool requireUploadKey)
+        {
+            bool hasUploadKey = HasUploadKey();
+            string path = Environment.GetEnvironmentVariable("LIGHTHOUSES_KEYSTORE_PATH");
+            string storePassword = Environment.GetEnvironmentVariable("LIGHTHOUSES_KEYSTORE_PASSWORD");
+            string alias = Environment.GetEnvironmentVariable("LIGHTHOUSES_KEY_ALIAS");
+            string keyPassword = Environment.GetEnvironmentVariable("LIGHTHOUSES_KEY_PASSWORD");
 
             if (!hasUploadKey)
             {
