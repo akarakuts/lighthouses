@@ -25,10 +25,16 @@ namespace LighthouseMatch3.Editor
             BuildAndroidBundle("Release/Lighthouses-validation.aab", false);
         }
 
-        private static void BuildAndroidBundle(string outputPath, bool requireUploadKey)
+        public static void BuildValidationAndroidForEmulator()
+        {
+            BuildValidationAndroid();
+        }
+
+        private static void BuildAndroidBundle(string outputPath, bool requireUploadKey, BuildOptions options = BuildOptions.None)
         {
             Directory.CreateDirectory("Release");
             EditorUserBuildSettings.buildAppBundle = true;
+            ProjectSetup.ConfigureReleasePlayerSettings();
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             ConfigureSigning(requireUploadKey);
@@ -39,7 +45,7 @@ namespace LighthouseMatch3.Editor
                 locationPathName = outputPath,
                 target = BuildTarget.Android,
                 targetGroup = BuildTargetGroup.Android,
-                options = BuildOptions.StrictMode
+                options = options
             });
 
             if (report.summary.result != BuildResult.Succeeded)

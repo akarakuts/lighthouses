@@ -27,7 +27,7 @@ namespace LighthouseMatch3.UI
             int cost = 8 + stage * 12;
             if (stage < 4)
             {
-                var upgrade = ui.CreateButton(screen.transform, translate("lighthouse_upgrade", new object[] { cost }), new Vector2(.5f, .18f), new Vector2(460, 78), palette.Gold, palette.Navy, () => upgradeLighthouse(cost));
+                var upgrade = ui.CreateButton(screen.transform, translate("lighthouse_upgrade", new object[] { cost }), new Vector2(.5f, .18f), new Vector2(460, 78), palette.Ocean, palette.Foam, () => upgradeLighthouse(cost));
                 upgrade.interactable = SaveService.Progress.Stars >= cost;
             }
             ui.CreateButton(screen.transform, translate("back_to_map", null), new Vector2(.5f, .09f), new Vector2(330, 70), palette.Ocean, palette.Foam, showMap);

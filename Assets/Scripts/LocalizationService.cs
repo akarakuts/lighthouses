@@ -7,6 +7,8 @@ namespace LighthouseMatch3
 {
     public static class LocalizationService
     {
+        private static Func<SystemLanguage> _systemLanguageProvider = () => Application.systemLanguage;
+
         private static readonly Dictionary<string, string> English = new Dictionary<string, string>
         {
             ["title"] = "LIGHTHOUSES",
@@ -16,6 +18,7 @@ namespace LighthouseMatch3
             ["daily_claimed"] = "Daily reward claimed",
             ["restore"] = "Restore lighthouse",
             ["settings"] = "Settings",
+            ["rules"] = "Rules",
             ["clear"] = "CLEAR",
             ["play"] = "PLAY",
             ["locked"] = "LOCKED",
@@ -42,6 +45,21 @@ namespace LighthouseMatch3
             ["no_lives"] = "No lives left. The next life arrives in {0}.",
             ["reshuffle"] = "The tide reshuffles the board",
             ["tutorial"] = "Make rows of three. Four create a beam, five create a pearl. Clear every goal before the moves run out.",
+            ["rules_title"] = "HOW TO PLAY",
+            ["rules_intro"] = "Restore the archipelago by clearing the goals on each island.",
+            ["rules_swap_title"] = "SWAP TILES",
+            ["rules_swap"] = "Swap two neighboring tiles to make a line of three or more.",
+            ["rules_specials_title"] = "CREATE SPECIALS",
+            ["rules_beam_title"] = "4 IN A ROW",
+            ["rules_beam"] = "A beam clears its whole row.",
+            ["rules_bomb_title"] = "T OR L SHAPE",
+            ["rules_bomb"] = "A bomb clears a 3 x 3 area.",
+            ["rules_pearl_title"] = "5 IN A ROW",
+            ["rules_pearl"] = "A pearl clears every tile of its color.",
+            ["rules_blockers_title"] = "CLEAR BLOCKERS",
+            ["rules_blockers"] = "Ice breaks with a match. Crates need two hits. Seaweed only clears with a special.",
+            ["rules_goal_title"] = "WIN THE LEVEL",
+            ["rules_goal"] = "Collect the required tiles and clear blockers before the moves run out.",
             ["win"] = "Island restored! {0} stars and {1} coins earned.",
             ["lose"] = "The tide was too strong. Try the level again.",
             ["reward"] = "Daily reward: {0} coins. Come back tomorrow to extend your streak.",
@@ -68,6 +86,7 @@ namespace LighthouseMatch3
             ["daily_claimed"] = "Награда получена",
             ["restore"] = "Восстановить маяк",
             ["settings"] = "Настройки",
+            ["rules"] = "Правила",
             ["clear"] = "ПРОЙДЕНО",
             ["play"] = "ИГРАТЬ",
             ["locked"] = "ЗАКРЫТО",
@@ -94,6 +113,21 @@ namespace LighthouseMatch3
             ["no_lives"] = "Жизни закончились. Следующая появится через {0}.",
             ["reshuffle"] = "Прилив перемешивает поле",
             ["tutorial"] = "Собирайте ряды по три. Четыре создают луч, пять - жемчужину. Выполните цели до окончания ходов.",
+            ["rules_title"] = "КАК ИГРАТЬ",
+            ["rules_intro"] = "Восстанавливайте архипелаг, выполняя цели на каждом острове.",
+            ["rules_swap_title"] = "МЕНЯЙТЕ ФИШКИ",
+            ["rules_swap"] = "Меняйте местами две соседние фишки, чтобы собрать ряд из трёх или больше.",
+            ["rules_specials_title"] = "СОЗДАВАЙТЕ БОНУСЫ",
+            ["rules_beam_title"] = "4 В РЯД",
+            ["rules_beam"] = "Луч очищает весь ряд.",
+            ["rules_bomb_title"] = "ФИГУРА Т ИЛИ Г",
+            ["rules_bomb"] = "Бомба очищает область 3 x 3.",
+            ["rules_pearl_title"] = "5 В РЯД",
+            ["rules_pearl"] = "Жемчужина очищает все фишки своего цвета.",
+            ["rules_blockers_title"] = "УБИРАЙТЕ ПРЕПЯТСТВИЯ",
+            ["rules_blockers"] = "Лёд разбивается совпадением. Ящик нужно ударить дважды. Водоросли убираются только бонусом.",
+            ["rules_goal_title"] = "ПОБЕДА НА УРОВНЕ",
+            ["rules_goal"] = "Соберите нужные фишки и очистите препятствия до окончания ходов.",
             ["win"] = "Остров восстановлен! Получено: звёзды {0}, монеты {1}.",
             ["lose"] = "Прилив оказался сильнее. Попробуйте уровень снова.",
             ["reward"] = "Ежедневная награда: {0} монет. Возвращайтесь завтра, чтобы продолжить серию.",
@@ -116,9 +150,7 @@ namespace LighthouseMatch3
             get
             {
                 string language = SaveService.Progress?.LanguageCode;
-                return string.IsNullOrWhiteSpace(language)
-                    ? Application.systemLanguage == SystemLanguage.Russian
-                    : language == "ru";
+                return ResolveLanguageCode(language) == "ru";
             }
         }
 
@@ -141,6 +173,24 @@ namespace LighthouseMatch3
         {
             SaveService.Progress.LanguageCode = IsRussian ? "en" : "ru";
             SaveService.Save();
+        }
+
+        public static void ConfigureSystemLanguageProviderForTests(Func<SystemLanguage> provider)
+        {
+            _systemLanguageProvider = provider ?? throw new ArgumentNullException(nameof(provider));
+        }
+
+        public static void ResetSystemLanguageProviderForTests()
+        {
+            _systemLanguageProvider = () => Application.systemLanguage;
+        }
+
+        private static string ResolveLanguageCode(string savedLanguage)
+        {
+            if (!string.IsNullOrWhiteSpace(savedLanguage))
+                return savedLanguage == "ru" ? "ru" : "en";
+
+            return _systemLanguageProvider() == SystemLanguage.Russian ? "ru" : "en";
         }
     }
 }

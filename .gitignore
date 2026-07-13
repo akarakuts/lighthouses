@@ -28,6 +28,8 @@ Tools/GenerateLevelAssets/bin/
 Tools/GenerateLevelAssets/obj/
 Release/editmode-results.xml
 Release/emulator-first-screen.png
+Release/signing/
+Release/*mapping*.txt
 
 # Graphify AST cache (regenerated locally; commit graph.json/graph.html/GRAPH_REPORT.md)
 graphify-out/

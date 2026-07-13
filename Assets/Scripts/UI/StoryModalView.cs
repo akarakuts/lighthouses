@@ -18,7 +18,7 @@ namespace LighthouseMatch3.UI
             panel.transform.SetAsLastSibling();
             ui.CreateText(panel.transform, translate("modal_title", null), 34, palette.Gold, new Vector2(.5f, .70f), new Vector2(760, 55), TextAnchor.MiddleCenter);
             ui.CreateText(panel.transform, message, 29, palette.Foam, new Vector2(.5f, .47f), new Vector2(740, 180), TextAnchor.MiddleCenter);
-            ui.CreateButton(panel.transform, translate("continue", null), new Vector2(.5f, .18f), new Vector2(310, 76), palette.Gold, palette.Navy, () =>
+            ui.CreateButton(panel.transform, translate("continue", null), new Vector2(.5f, .18f), new Vector2(310, 76), palette.Ocean, palette.Foam, () =>
             {
                 UnityEngine.Object.Destroy(panel.gameObject);
                 onContinue?.Invoke();

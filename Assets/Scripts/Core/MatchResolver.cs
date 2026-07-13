@@ -5,10 +5,18 @@ namespace LighthouseMatch3
 {
     public readonly struct MatchClearResult
     {
-        public int ScoreDelta { get; init; }
-        public int CollectedDelta { get; init; }
-        public int BlockersCleared { get; init; }
-        public bool SpecialWasTriggered { get; init; }
+        public int ScoreDelta { get; }
+        public int CollectedDelta { get; }
+        public int BlockersCleared { get; }
+        public bool SpecialWasTriggered { get; }
+
+        public MatchClearResult(int scoreDelta, int collectedDelta, int blockersCleared, bool specialWasTriggered)
+        {
+            ScoreDelta = scoreDelta;
+            CollectedDelta = collectedDelta;
+            BlockersCleared = blockersCleared;
+            SpecialWasTriggered = specialWasTriggered;
+        }
     }
 
     public static class MatchResolver
@@ -68,13 +76,11 @@ namespace LighthouseMatch3
                 tiles[x, y] = null;
             }
 
-            return new MatchClearResult
-            {
-                ScoreDelta = matches.Count * 100 * chain,
-                CollectedDelta = collected,
-                BlockersCleared = blockersCleared,
-                SpecialWasTriggered = triggeredBySpecial
-            };
+            return new MatchClearResult(
+                matches.Count * 100 * chain,
+                collected,
+                blockersCleared,
+                triggeredBySpecial);
         }
     }
 }

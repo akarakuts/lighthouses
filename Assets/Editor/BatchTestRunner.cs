@@ -10,14 +10,18 @@ namespace LighthouseMatch3.Editor
     {
         public static void RunEditModeTests()
         {
-            Run(TestMode.EditMode, "Release/editmode-tests.xml");
+            Run(TestMode.EditMode, "LighthouseMatch3.EditModeTests", "Release/editmode-tests.xml");
         }
 
-        private static void Run(TestMode mode, string resultPath)
+        private static void Run(TestMode mode, string assemblyName, string resultPath)
         {
             var api = ScriptableObject.CreateInstance<TestRunnerApi>();
             api.RegisterCallbacks(new TestCallbacks(resultPath));
-            api.Execute(new ExecutionSettings(new Filter { testMode = mode }));
+            api.Execute(new ExecutionSettings(new Filter
+            {
+                testMode = mode,
+                assemblyNames = new[] { assemblyName }
+            }));
         }
 
         private sealed class TestCallbacks : ICallbacks

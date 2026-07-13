@@ -6,7 +6,7 @@ AAB_PATH="${1:-$ROOT/Release/Lighthouses-validation.aab}"
 BUNDLETOOL_JAR="${BUNDLETOOL_JAR:-$ROOT/Tools/bin/bundletool-all-1.18.3.jar}"
 ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/Library/Android/sdk}"
 ADB="${ADB:-$ANDROID_SDK_ROOT/platform-tools/adb}"
-PACKAGE_NAME="com.archipelagostudio.lighthouses"
+PACKAGE_NAME="com.karakuts.lighthouses"
 OUTPUT_DIR="$ROOT/Release/qa-$(date +%Y%m%d-%H%M%S)"
 
 if [[ ! -f "$AAB_PATH" ]]; then

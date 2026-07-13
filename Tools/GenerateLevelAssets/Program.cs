@@ -7,7 +7,7 @@ using LighthouseMatch3;
 
 internal static class Program
 {
-    private const string ScriptGuid = "7f4e8a2b1c3d4e5f6789012345678ab";
+    private const string ScriptGuid = "7f4e8a2b1c3d4e5f67890123456789ab";
     private const string OutputFolder = "Assets/Resources/Levels";
 
     private static int Main()

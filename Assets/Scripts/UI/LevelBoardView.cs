@@ -1,5 +1,4 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,11 +12,14 @@ namespace LighthouseMatch3.UI
 
         public Button[,] CellButtons { get; private set; }
         public Image[,] TileImages => _tileImages;
+        public Image[,] OverlayImages => _overlayImages;
         private Image[,] _tileImages;
-        public TextMeshProUGUI[,] Markers { get; private set; }
-        public TextMeshProUGUI MovesText { get; private set; }
-        public TextMeshProUGUI GoalText { get; private set; }
-        public TextMeshProUGUI ScoreText { get; private set; }
+        private Image[,] _overlayImages;
+        public Text[,] Markers { get; private set; }
+        public Text MovesText { get; private set; }
+        public Text GoalText { get; private set; }
+        public Text ScoreText { get; private set; }
+        public Transform AnimationRoot { get; private set; }
 
         public LevelBoardView(RuntimeUiFactory ui, GamePalette palette)
         {
@@ -34,6 +36,7 @@ namespace LighthouseMatch3.UI
             Action<int, int> selectCell)
         {
             var screen = _ui.CreateFullScreenPanel(canvasRoot, "LevelScreen", _palette.Navy);
+            AnimationRoot = screen.transform;
             _ui.CreateButton(screen.transform, "<", new Vector2(.09f, .93f), new Vector2(86, 72), _palette.Ocean, _palette.Foam, showMap);
             _ui.CreateText(screen.transform, translate("level", new object[] { level.Id }), 38, _palette.Foam, new Vector2(.5f, .935f), new Vector2(340, 65), TextAnchor.MiddleCenter);
             ScoreText = _ui.CreateText(screen.transform, translate("score", new object[] { 0 }), 26, _palette.Gold, new Vector2(.82f, .935f), new Vector2(210, 55), TextAnchor.MiddleCenter);
@@ -57,7 +60,8 @@ namespace LighthouseMatch3.UI
             int size = LevelCatalog.BoardSize;
             CellButtons = new Button[size, size];
             _tileImages = new Image[size, size];
-            Markers = new TextMeshProUGUI[size, size];
+            _overlayImages = new Image[size, size];
+            Markers = new Text[size, size];
             for (int y = size - 1; y >= 0; y--)
             for (int x = 0; x < size; x++)
             {
@@ -65,6 +69,8 @@ namespace LighthouseMatch3.UI
                 int cy = y;
                 var cell = _pool.Rent(boardRoot.transform, $"Cell {x},{y}");
                 var background = cell.GetComponent<Image>();
+                background.sprite = PuzzleSpriteLibrary.CellPanel();
+                background.type = Image.Type.Sliced;
                 background.color = _palette.CellBackground;
                 var button = cell.GetComponent<Button>();
                 button.targetGraphic = background;
@@ -73,8 +79,13 @@ namespace LighthouseMatch3.UI
                 CellButtons[x, y] = button;
 
                 var tile = _ui.CreateImage(cell.transform, "Tile", new Vector2(.5f, .5f), new Vector2(76, 76), Color.white);
+                tile.raycastTarget = false;
                 _tileImages[x, y] = tile;
-                Markers[x, y] = _ui.CreateText(cell.transform, "", 25, Color.white, new Vector2(.5f, .5f), new Vector2(74, 35), TextAnchor.MiddleCenter);
+                var overlay = _ui.CreateImage(cell.transform, "Effect", new Vector2(.5f, .5f), new Vector2(70, 70), Color.clear);
+                overlay.raycastTarget = false;
+                _overlayImages[x, y] = overlay;
+                Markers[x, y] = _ui.CreateText(cell.transform, "", 18, Color.white, new Vector2(.76f, .24f), new Vector2(28, 28), TextAnchor.MiddleCenter);
+                Markers[x, y].raycastTarget = false;
             }
 
             _ui.CreateText(screen.transform, translate("tap_swap", null), 24, _palette.Hint, new Vector2(.5f, .12f), new Vector2(800, 50), TextAnchor.MiddleCenter);
@@ -94,10 +105,44 @@ namespace LighthouseMatch3.UI
             _pool.ReturnAll(cells);
             CellButtons = null;
             _tileImages = null;
+            _overlayImages = null;
             Markers = null;
             MovesText = null;
             GoalText = null;
             ScoreText = null;
+            AnimationRoot = null;
+        }
+
+        public Vector3 GetCellWorldPosition(int x, int y) => CellButtons[x, y].transform.position;
+
+        public Vector3 GetFallStartWorldPosition(int x, int fromY, int boardSize)
+        {
+            if (fromY < boardSize) return GetCellWorldPosition(x, fromY);
+
+            Vector3 top = GetCellWorldPosition(x, boardSize - 1);
+            Vector3 step = boardSize > 1
+                ? top - GetCellWorldPosition(x, boardSize - 2)
+                : new Vector3(0f, 100f, 0f);
+            return top + step * (fromY - boardSize + 1);
+        }
+
+        public void SetTileVisible(int x, int y, bool visible)
+        {
+            if (_tileImages == null) return;
+            if (_tileImages[x, y] != null)
+            {
+                Color color = _tileImages[x, y].color;
+                color.a = visible ? 1f : 0f;
+                _tileImages[x, y].color = color;
+            }
+            if (_overlayImages[x, y] != null)
+            {
+                Color overlayColor = _overlayImages[x, y].color;
+                overlayColor.a = visible && _overlayImages[x, y].sprite != null ? 1f : 0f;
+                _overlayImages[x, y].color = overlayColor;
+            }
+            if (Markers[x, y] != null)
+                Markers[x, y].color = visible ? Color.white : Color.clear;
         }
 
         public void Refresh(
@@ -120,17 +165,18 @@ namespace LighthouseMatch3.UI
                 if (tile == null)
                 {
                     _tileImages[x, y].color = Color.clear;
+                    _overlayImages[x, y].color = Color.clear;
                     Markers[x, y].text = string.Empty;
                     continue;
                 }
-                _tileImages[x, y].color = _palette.TileColors[(int)tile.Kind];
+                _tileImages[x, y].sprite = PuzzleSpriteLibrary.Tile(tile.Kind);
+                _tileImages[x, y].color = Color.white;
                 CellButtons[x, y].image.color = selected.HasValue && selected.Value.x == x && selected.Value.y == y ? _palette.Gold : _palette.CellBackground;
-                string glyph = TileGlyph(tile.Kind);
-                string special = tile.Special == SpecialKind.Beam ? "B" : tile.Special == SpecialKind.Bomb ? "O" : tile.Special == SpecialKind.Pearl ? "P" : "";
-                string blocker = BlockerMarker(blockers[x, y]);
-                string state = string.IsNullOrEmpty(blocker) ? special : blocker;
-                Markers[x, y].text = string.IsNullOrEmpty(state) ? glyph : $"{glyph}\n{state}";
-                Markers[x, y].color = string.IsNullOrEmpty(state) ? _palette.Navy : Color.white;
+                Sprite overlay = BlockerSprite(blockers[x, y]) ?? PuzzleSpriteLibrary.Special(tile.Special);
+                _overlayImages[x, y].sprite = overlay;
+                _overlayImages[x, y].color = overlay == null ? Color.clear : Color.white;
+                Markers[x, y].text = CrateLabel(blockers[x, y]);
+                Markers[x, y].color = Color.white;
             }
 
             if (MovesText == null) return;
@@ -143,13 +189,13 @@ namespace LighthouseMatch3.UI
         public void ShowToast(Transform screenRoot, string message) =>
             _ui.CreateToast(screenRoot, message, 25, _palette.Gold, new Vector2(.5f, .77f), new Vector2(700, 42));
 
-        private static string BlockerMarker(BlockerState blocker)
+        private static Sprite BlockerSprite(BlockerState blocker)
         {
-            if (blocker == null || blocker.Kind == BlockerKind.None) return "";
-            if (blocker.Kind == BlockerKind.Ice) return "I";
-            if (blocker.Kind == BlockerKind.Crate) return blocker.HitsRemaining > 1 ? $"C{blocker.HitsRemaining}" : "C";
-            return blocker.Kind == BlockerKind.Seaweed ? "W" : "";
+            return blocker == null || blocker.Kind == BlockerKind.None ? null : PuzzleSpriteLibrary.Blocker(blocker.Kind);
         }
+
+        private static string CrateLabel(BlockerState blocker) =>
+            blocker != null && blocker.Kind == BlockerKind.Crate && blocker.HitsRemaining > 1 ? blocker.HitsRemaining.ToString() : string.Empty;
 
         private static string TileName(TileKind kind, Func<string, object[], string> translate) => translate(kind switch
         {
@@ -161,14 +207,5 @@ namespace LighthouseMatch3.UI
             _ => "crystal"
         }, null);
 
-        private static string TileGlyph(TileKind kind) => kind switch
-        {
-            TileKind.Coral => "C",
-            TileKind.Shell => "S",
-            TileKind.Drop => "D",
-            TileKind.Sunstone => "U",
-            TileKind.Starfish => "F",
-            _ => "R"
-        };
     }
 }

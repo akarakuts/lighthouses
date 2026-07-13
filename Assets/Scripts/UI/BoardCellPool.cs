@@ -12,6 +12,12 @@ namespace LighthouseMatch3.UI
         public GameObject Rent(Transform parent, string name)
         {
             GameObject cell = _available.Count > 0 ? _available.Pop() : CreateCell(name);
+            for (int i = 0; i < cell.transform.childCount; i++)
+            {
+                Transform child = cell.transform.GetChild(i);
+                child.gameObject.SetActive(false);
+                UnityEngine.Object.Destroy(child.gameObject);
+            }
             cell.transform.SetParent(parent, false);
             cell.SetActive(true);
             cell.name = name;

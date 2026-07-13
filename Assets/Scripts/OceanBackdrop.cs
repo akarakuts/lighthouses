@@ -9,19 +9,18 @@ namespace LighthouseMatch3
         {
             vh.Clear();
             Rect rect = GetPixelAdjustedRect();
-            AddQuad(vh, rect.xMin, rect.yMin, rect.xMax, rect.yMax, new Color(.025f, .11f, .18f, .55f));
+            AddQuad(vh, rect.xMin, rect.yMin, rect.xMax, rect.yMax, new Color(.015f, .10f, .16f, .24f));
 
-            float[] heights = { .14f, .22f, .33f, .48f, .66f, .79f };
+            float[] heights = { .12f, .31f, .55f, .76f };
             Color[] colors =
             {
-                new Color(.04f, .23f, .33f, .70f), new Color(.03f, .30f, .40f, .58f),
-                new Color(.06f, .35f, .44f, .46f), new Color(.10f, .43f, .49f, .32f),
-                new Color(.17f, .49f, .53f, .22f), new Color(.30f, .64f, .63f, .14f)
+                new Color(.03f, .31f, .42f, .16f), new Color(.06f, .43f, .53f, .13f),
+                new Color(.16f, .55f, .61f, .11f), new Color(.36f, .68f, .68f, .08f)
             };
             for (int i = 0; i < heights.Length; i++)
             {
                 float y = Mathf.Lerp(rect.yMin, rect.yMax, heights[i]);
-                AddQuad(vh, rect.xMin, y, rect.xMax, y + rect.height * .075f, colors[i]);
+                AddQuad(vh, rect.xMin, y, rect.xMax, y + rect.height * .10f, colors[i]);
             }
         }
 

@@ -1,6 +1,7 @@
 using LighthouseMatch3;
 using LighthouseMatch3.Tests;
 using NUnit.Framework;
+using UnityEngine;
 
 public sealed class LocalizationServiceTests
 {
@@ -12,12 +13,35 @@ public sealed class LocalizationServiceTests
     }
 
     [TearDown]
-    public void TearDown() => SaveService.ResetDependencies();
+    public void TearDown()
+    {
+        LocalizationService.ResetSystemLanguageProviderForTests();
+        SaveService.ResetDependencies();
+    }
+
+    [Test]
+    public void Get_UsesSystemRussianWhenNoLanguageSaved()
+    {
+        SaveService.Progress.LanguageCode = string.Empty;
+        LocalizationService.ConfigureSystemLanguageProviderForTests(() => SystemLanguage.Russian);
+
+        Assert.That(LocalizationService.Get("title"), Is.EqualTo("МАЯКИ"));
+    }
+
+    [Test]
+    public void Get_UsesSystemEnglishWhenNoLanguageSaved()
+    {
+        SaveService.Progress.LanguageCode = string.Empty;
+        LocalizationService.ConfigureSystemLanguageProviderForTests(() => SystemLanguage.English);
+
+        Assert.That(LocalizationService.Get("title"), Is.EqualTo("LIGHTHOUSES"));
+    }
 
     [Test]
     public void Get_UsesSavedRussianLanguage()
     {
         SaveService.Progress.LanguageCode = "ru";
+        LocalizationService.ConfigureSystemLanguageProviderForTests(() => SystemLanguage.English);
 
         Assert.That(LocalizationService.Get("title"), Is.EqualTo("МАЯКИ"));
         Assert.That(LocalizationService.Get("moves", 7), Is.EqualTo("Ходы: 7"));

@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace LighthouseMatch3.Editor
 {
@@ -14,18 +15,32 @@ namespace LighthouseMatch3.Editor
             PlayerSettings.companyName = "Archipelago Studio";
             PlayerSettings.productName = "Lighthouses: Mystery of the Archipelago";
             if (string.IsNullOrWhiteSpace(PlayerSettings.bundleVersion)) PlayerSettings.bundleVersion = "1.0.0";
-            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.archipelagostudio.lighthouses");
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
-            if (PlayerSettings.Android.bundleVersionCode < 1) PlayerSettings.Android.bundleVersionCode = 1;
-            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
-            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
-            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.karakuts.lighthouses");
+            ConfigureReleasePlayerSettings();
             EditorUserBuildSettings.buildAppBundle = true;
             ApplyAndroidIcon();
 
             if (System.Array.Exists(EditorBuildSettings.scenes, scene => scene.path == scenePath)) return;
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(scenePath, true) };
             Debug.Log("Lighthouse Match3 project settings initialized.");
+        }
+
+        internal static void ConfigureAndroidGraphics()
+        {
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.OpenGLES3 });
+        }
+
+        internal static void ConfigureReleasePlayerSettings()
+        {
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+            PlayerSettings.usePlayerLog = false;
+            PlayerSettings.stripEngineCode = true;
+            if (PlayerSettings.Android.bundleVersionCode < 1) PlayerSettings.Android.bundleVersionCode = 1;
+            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+            PlayerSettings.Android.minifyRelease = true;
+            ConfigureAndroidGraphics();
         }
 
         private static void ApplyAndroidIcon()

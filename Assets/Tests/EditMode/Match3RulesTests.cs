@@ -124,6 +124,26 @@ public class Match3RulesTests
         Assert.That(engine.Tiles[1, 2].Kind, Is.EqualTo(TileKind.Shell));
     }
 
+    [Test]
+    public void TileFallMoves_ComputesExistingAndSpawnedTiles()
+    {
+        int size = 4;
+        var before = new TileState[size, size];
+        var after = new TileState[size, size];
+        var falling = new TileState(TileKind.Coral);
+        var spawned = new TileState(TileKind.Shell);
+
+        before[1, 3] = falling;
+        after[1, 0] = falling;
+        after[1, 3] = spawned;
+
+        var moves = TileFallMoves.Compute(before, after, size);
+
+        Assert.That(moves, Has.Count.EqualTo(2));
+        Assert.That(moves, Has.Some.Matches<TileFallMove>(move => move.X == 1 && move.FromY == 3 && move.ToY == 0 && move.Tile == falling));
+        Assert.That(moves, Has.Some.Matches<TileFallMove>(move => move.X == 1 && move.FromY == size && move.ToY == 3 && move.Tile == spawned));
+    }
+
     private static int CountSpecials(TileState[,] board, SpecialKind kind)
     {
         int count = 0;

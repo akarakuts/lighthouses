@@ -57,9 +57,10 @@ namespace LighthouseMatch3
             scaler.matchWidthOrHeight = 0.4f;
         }
 
-        private void ShowMap() { ClearScreen(); _screen = MapScreenView.Build(_canvas.transform, _ui, _palette, Translate, StartLevel, ShowLighthouse, ShowSettings, ClaimDailyReward); }
+        private void ShowMap() { ClearScreen(); _screen = MapScreenView.Build(_canvas.transform, _ui, _palette, Translate, StartLevel, ShowLighthouse, ShowSettings, ShowRules, ClaimDailyReward); }
         private void ShowLighthouse() { ClearScreen(); _screen = LighthouseScreenView.Build(_canvas.transform, _ui, _palette, Translate, ShowMap, UpgradeLighthouse); }
         private void ShowSettings() { ClearScreen(); _screen = SettingsScreenView.Build(_canvas.transform, _ui, _palette, Translate, ShowMap, ToggleSound, ToggleHaptics, ToggleLanguage, () => ShowStory(T("privacy_copy"), ShowSettings)); }
+        private void ShowRules() { ClearScreen(); _screen = RulesScreenView.Build(_canvas.transform, _ui, _palette, Translate, ShowMap); }
 
         private void UpgradeLighthouse(int cost)
         {
@@ -139,9 +140,12 @@ namespace LighthouseMatch3
                 yield return UiAnimation.PulseMatchedTiles(_boardView.TileImages, matches, boardSize, 0.12f);
                 _session.ClearMatches(matches, chain);
                 AudioService.Instance?.PlayMatch();
-                _session.CollapseBoard();
                 RefreshView();
-                yield return new WaitForSeconds(.20f);
+                TileState[,] beforeCollapse = SnapshotTiles(_session.Tiles);
+                _session.CollapseBoard();
+                var fallMoves = TileFallMoves.Compute(beforeCollapse, _session.Tiles, boardSize);
+                yield return UiAnimation.AnimateTileFalls(_boardView, fallMoves, boardSize, 0.22f);
+                RefreshView();
                 if (_session.IsWin) { ShowResult(true); yield break; }
                 if (_session.Moves <= 0) { ShowResult(false); yield break; }
                 matches = Match3Rules.FindMatches(_session.Tiles);
@@ -196,6 +200,16 @@ namespace LighthouseMatch3
             var points = new BoardPoint[swapped.Length];
             for (int i = 0; i < swapped.Length; i++) points[i] = new BoardPoint(swapped[i].x, swapped[i].y);
             return points;
+        }
+
+        private static TileState[,] SnapshotTiles(TileState[,] tiles)
+        {
+            int size = tiles.GetLength(0);
+            var snapshot = new TileState[size, size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+                snapshot[x, y] = tiles[x, y];
+            return snapshot;
         }
 
         private static string Translate(string key, object[] args) =>

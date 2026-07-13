@@ -1,5 +1,4 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,13 +6,6 @@ namespace LighthouseMatch3
 {
     public sealed class RuntimeUiFactory
     {
-        private readonly TMP_FontAsset _font;
-
-        public RuntimeUiFactory()
-        {
-            _font = TMP_Settings.defaultFontAsset ?? Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
-        }
-
         public Image CreateImage(Transform parent, string name, Vector2 anchor, Vector2 size, Color color)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(Image));
@@ -29,9 +21,9 @@ namespace LighthouseMatch3
             return image;
         }
 
-        public TextMeshProUGUI CreateText(Transform parent, string value, int fontSize, Color color, Vector2 anchor, Vector2 size, TextAnchor alignment)
+        public Text CreateText(Transform parent, string value, int fontSize, Color color, Vector2 anchor, Vector2 size, TextAnchor alignment)
         {
-            var go = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+            var go = new GameObject("Text", typeof(RectTransform), typeof(Text));
             go.transform.SetParent(parent, false);
             var rect = go.GetComponent<RectTransform>();
             rect.anchorMin = anchor;
@@ -39,24 +31,37 @@ namespace LighthouseMatch3
             rect.pivot = new Vector2(.5f, .5f);
             rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = size;
-            var text = go.GetComponent<TextMeshProUGUI>();
-            if (_font != null) text.font = _font;
+            var text = go.GetComponent<Text>();
+            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             text.text = value;
-            text.fontSize = fontSize;
-            text.alignment = ToTextAlignment(alignment);
+            text.fontSize = Mathf.Max(24, Mathf.RoundToInt(fontSize * 1.18f));
+            text.fontStyle = text.fontSize >= 32 ? FontStyle.Bold : FontStyle.Normal;
+            text.alignment = alignment;
             text.color = color;
-            text.enableWordWrapping = true;
-            text.overflowMode = TextOverflowModes.Overflow;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
+            text.lineSpacing = 1.05f;
+            text.raycastTarget = false;
+
+            var outline = go.AddComponent<Outline>();
+            outline.effectColor = new Color(.005f, .04f, .07f, .9f);
+            outline.effectDistance = new Vector2(1.6f, -1.6f);
+            var shadow = go.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, .7f);
+            shadow.effectDistance = new Vector2(3f, -3f);
             return text;
         }
 
         public Button CreateButton(Transform parent, string label, Vector2 anchor, Vector2 size, Color color, Color textColor, Action action)
         {
             Image image = CreateImage(parent, "Button", anchor, size, color);
+            image.sprite = PuzzleSpriteLibrary.ButtonPanel();
+            image.type = Image.Type.Sliced;
             var button = image.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
             button.onClick.AddListener(() => action?.Invoke());
-            CreateText(image.transform, label, 25, textColor, new Vector2(.5f, .5f), size - new Vector2(16, 12), TextAnchor.MiddleCenter);
+            int labelSize = size.y >= 150f ? 34 : size.y >= 80f ? 29 : size.y >= 70f ? 26 : 23;
+            CreateText(image.transform, label, labelSize, textColor, new Vector2(.5f, .5f), size - new Vector2(16, 12), TextAnchor.MiddleCenter);
             return button;
         }
 
@@ -67,14 +72,10 @@ namespace LighthouseMatch3
             panel.rectTransform.anchorMax = Vector2.one;
             panel.rectTransform.offsetMin = Vector2.zero;
             panel.rectTransform.offsetMax = Vector2.zero;
-            var backdrop = new GameObject("Ocean Backdrop", typeof(RectTransform), typeof(CanvasRenderer), typeof(OceanBackdrop));
-            backdrop.transform.SetParent(panel.transform, false);
-            var backdropRect = backdrop.GetComponent<RectTransform>();
-            backdropRect.anchorMin = Vector2.zero;
-            backdropRect.anchorMax = Vector2.one;
-            backdropRect.offsetMin = Vector2.zero;
-            backdropRect.offsetMax = Vector2.zero;
-            backdrop.transform.SetAsFirstSibling();
+            Image atmosphere = CreateImage(panel.transform, "Archipelago Atmosphere", new Vector2(.5f, .48f), new Vector2(980, 1420), new Color(1f, 1f, 1f, .44f));
+            ApplyArtwork(atmosphere, "Artwork/LighthouseIsland-v1");
+            atmosphere.color = new Color(1f, 1f, 1f, .44f);
+            atmosphere.transform.SetAsFirstSibling();
             return panel.gameObject;
         }
 
@@ -87,25 +88,12 @@ namespace LighthouseMatch3
             image.preserveAspect = true;
         }
 
-        public TextMeshProUGUI CreateToast(Transform parent, string message, int fontSize, Color color, Vector2 anchor, Vector2 size, float lifetimeSeconds = 2f)
+        public Text CreateToast(Transform parent, string message, int fontSize, Color color, Vector2 anchor, Vector2 size, float lifetimeSeconds = 2f)
         {
-            TextMeshProUGUI toast = CreateText(parent, message, fontSize, color, anchor, size, TextAnchor.MiddleCenter);
+            Text toast = CreateText(parent, message, fontSize, color, anchor, size, TextAnchor.MiddleCenter);
             UnityEngine.Object.Destroy(toast.gameObject, lifetimeSeconds);
             return toast;
         }
 
-        private static TextAlignmentOptions ToTextAlignment(TextAnchor anchor) => anchor switch
-        {
-            TextAnchor.UpperLeft => TextAlignmentOptions.TopLeft,
-            TextAnchor.UpperCenter => TextAlignmentOptions.Top,
-            TextAnchor.UpperRight => TextAlignmentOptions.TopRight,
-            TextAnchor.MiddleLeft => TextAlignmentOptions.MidlineLeft,
-            TextAnchor.MiddleCenter => TextAlignmentOptions.Center,
-            TextAnchor.MiddleRight => TextAlignmentOptions.MidlineRight,
-            TextAnchor.LowerLeft => TextAlignmentOptions.BottomLeft,
-            TextAnchor.LowerCenter => TextAlignmentOptions.Bottom,
-            TextAnchor.LowerRight => TextAlignmentOptions.BottomRight,
-            _ => TextAlignmentOptions.Center
-        };
     }
 }

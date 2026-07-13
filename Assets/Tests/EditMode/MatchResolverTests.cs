@@ -72,11 +72,12 @@ public sealed class MatchResolverTests
         board[0, 0].Kind = TileKind.Coral;
         board[1, 0].Kind = TileKind.Coral;
         board[2, 0].Kind = TileKind.Coral;
+        board[3, 0].Kind = TileKind.Shell;
         var matches = Match3Rules.FindMatches(board);
 
         MatchClearResult result = MatchResolver.ClearMatches(board, blockers, Size, matches, chain: 2, TileKind.Coral);
 
-        Assert.That(result.ScoreDelta, Is.EqualTo(900));
+        Assert.That(result.ScoreDelta, Is.EqualTo(600));
         Assert.That(result.CollectedDelta, Is.EqualTo(3));
         Assert.That(board[0, 0], Is.Null);
         Assert.That(board[1, 0], Is.Null);
@@ -115,7 +116,8 @@ public sealed class MatchResolverTests
     public void PrepareResolutionStep_PlacesCreatedSpecialOnKeepCell()
     {
         TileState[,] board = TestFixtures.NewBoard();
-        for (int x = 0; x < 4; x++) board[x, 0].Kind = TileKind.Drop;
+        for (int col = 0; col < 4; col++) board[col, 0].Kind = TileKind.Drop;
+        board[4, 0].Kind = TileKind.Shell;
         var matches = Match3Rules.FindMatches(board);
         var swapped = new[] { new BoardPoint(2, 0), new BoardPoint(3, 0) };
 

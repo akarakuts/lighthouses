@@ -25,6 +25,8 @@ namespace LighthouseMatch3
                 var system = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
                 DontDestroyOnLoad(system);
             }
+            if (FindFirstObjectByType<AudioListener>() == null)
+                gameObject.AddComponent<AudioListener>();
             gameObject.AddComponent<AudioService>();
             gameObject.AddComponent<Match3GameController>();
         }

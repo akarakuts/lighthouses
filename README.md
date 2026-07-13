@@ -31,7 +31,7 @@ The project builds all gameplay UI at runtime (colored tiles and labels) so it i
 | Tests | Unity Test Framework (EditMode + PlayMode), NUnit |
 | CI | GitHub Actions + [Game CI](https://game.ci/) |
 
-**Android package:** `com.archipelagostudio.lighthouses`
+**Android package:** `com.karakuts.lighthouses`
 
 ## Requirements
 
@@ -137,7 +137,7 @@ Production builds require environment variables:
 | `LIGHTHOUSES_KEY_ALIAS` | Key alias |
 | `LIGHTHOUSES_KEY_PASSWORD` | Key password |
 
-Store listing copy, privacy policy draft, QA checklist, and store graphics live under [`Release/`](Release/). Device smoke test: [`Tools/qa/run_android_smoke.sh`](Tools/qa/run_android_smoke.sh).
+Store listing copy, privacy policy draft, QA checklist, and store graphics live under [`Release/`](Release/). RuStore handoff: [`Release/RUSTORE_CHECKLIST.md`](Release/RUSTORE_CHECKLIST.md). Device smoke test: [`Tools/qa/run_android_smoke.sh`](Tools/qa/run_android_smoke.sh). Release scripts: [`Tools/release/`](Tools/release/).
 
 ## Project layout
 

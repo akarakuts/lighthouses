@@ -17,7 +17,16 @@
 - [ ] Create a private upload keystore outside this repository. Set `LIGHTHOUSES_KEYSTORE_PATH`, `LIGHTHOUSES_KEYSTORE_PASSWORD`, `LIGHTHOUSES_KEY_ALIAS` and `LIGHTHOUSES_KEY_PASSWORD` only in the build environment.
 - [ ] Build an Android App Bundle, not an APK. Use `BuildCommandLine.BuildValidationAndroid` for a debug-signed local validation bundle.
 - [ ] For a Google Play upload, set `LIGHTHOUSES_VERSION_NAME`, a new positive `LIGHTHOUSES_VERSION_CODE`, and all four `LIGHTHOUSES_KEYSTORE_*` variables; then use `BuildCommandLine.BuildProductionAndroid`.
-- [ ] Install the bundle through internal testing and inspect Android vitals for crashes and ANRs.
+- [ ] For RuStore, follow [`RUSTORE_CHECKLIST.md`](RUSTORE_CHECKLIST.md): export PEM signing certs, build production AAB with `Tools/release/build_production_aab.sh`, upload signature before the AAB.
+
+## RuStore Console
+
+- [ ] Register in RuStore Console and create the app with package `com.karakuts.lighthouses`.
+- [ ] Upload app signing certificate from `Tools/release/export_rustore_signing.sh` before the AAB.
+- [ ] Fill listing fields from `RUSTORE_LISTING.md` (name ≤30 chars, RU descriptions, tags, contacts).
+- [ ] Upload icon, screenshots from `StoreAssets/`, and a public HTTPS privacy policy URL.
+- [ ] Declare permissions: `VIBRATE` only; no personal data collection.
+- [ ] Submit for moderation after processing completes.
 
 ## Google Play Console
 
